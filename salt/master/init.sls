@@ -1,6 +1,7 @@
 {% set tls_dir = salt['pillar.get']('master:tls_dir', 'tls') %}
 {% set common_name = salt['pillar.get']('master:cert_common_name', 'localhost') %}
-{% set redis_pass = salt['pillar.get']('redis:passord', 'S0m3R3@1ly!0ngP@55w0rd' %}
+{% set random_pass = salt['cmd.run']("date | sha512sum | sed 's/\S*\-$//g'") %}
+{% set redis_pass = salt['pillar.get']('redis:password', random_pass) %}
 
 master_deps:
   pkg.installed:
@@ -50,7 +51,7 @@ redis_config:
     - source: salt://master/redis_config.conf
     - template: jinja
     - context:
-        redis_pass: {{ redis_pass) }}
+        redis_pass: {{ redis_pass }}
     - require:
         - pkg: master_deps
 
@@ -76,7 +77,9 @@ salt-master:
     - require:
         - pkg: master_deps
     - watch:
-        - file: /etc/master.d/*
+        - file: master_halite_config
+        - file: master_redis_config
+        - file: master_gitfs_config
 
 redis-server:
   service.running:
