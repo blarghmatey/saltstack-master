@@ -71,6 +71,16 @@ master_certs:
     - require:
         - pip: master_pip
 
+cloud_provider_dir:
+  file.directory:
+    - name: /etc/salt/cloud.providers.d
+    - makedirs: True
+
+cloud_profile_dir:
+  file.directory:
+    - name: /etc/salt/cloud.profiles.d
+    - makedirs: True
+
 salt-master:
   service.running:
     - enable: True
@@ -80,6 +90,23 @@ salt-master:
         - file: master_halite_config
         - file: master_redis_config
         - file: master_gitfs_config
+        - file: cloud_provider_dir
+
+state_dir:
+  file.directory:
+    - name: /srv/salt
+    - makedirs: True
+
+pillar_dir:
+  file.directory:
+    - name: /srv/pillar
+    - makedirs: True
+
+key_dir:
+  file.directory:
+    - name: /etc/salt/keys
+    - require:
+        - pkg: master_deps
 
 redis-server:
   service.running:
