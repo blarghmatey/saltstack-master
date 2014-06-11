@@ -18,7 +18,8 @@ master_gitfs_config:
   file.managed:
     - name: /etc/salt/mater.d/gitfs.conf
     - source: salt://master/master_gitfs.conf
-    - makedirs: True
+    - require:
+        - pkg: salt-master
 
 master_state_config:
   file.append:
