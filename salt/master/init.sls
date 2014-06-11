@@ -31,11 +31,12 @@ master_halite_config:
   file.managed:
     - name: /etc/salt/master.d/halite.conf
     - source: salt://master/halite.conf
+    - template: jinja
     - require:
         - pkg: salt-master
     - context:
-        - tls_dir: {{ tls_dir }}
-        - common_name: {{ common_name }}
+        tls_dir: {{ tls_dir }}
+        common_name: {{ common_name }}
 
 master_pip:
   pip.installed:
@@ -55,12 +56,17 @@ master_certs:
 
 salt-master:
   service.running:
-    - enabled: True
+    - enable: True
     - require:
         - pkg: master_deps
 
-redis:
+redis-server:
   service.running:
-    - enabled: True
+    - enable: True
     - require:
         - pkg: master_deps
+
+salt-minion:
+  service.dead:
+    - require:
+        - service: salt-master
