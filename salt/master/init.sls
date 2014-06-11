@@ -81,6 +81,13 @@ cloud_profile_dir:
     - name: /etc/salt/cloud.profiles.d
     - makedirs: True
 
+aws_base_config:
+  file.managed:
+    - name: /etc/salt/cloud.providers.d/amazon.conf
+    - source: salt://master/aws_config.conf
+    - require:
+        - file: cloud_provider_dir
+
 salt-master:
   service.running:
     - enable: True
@@ -107,6 +114,12 @@ key_dir:
     - name: /etc/salt/keys
     - require:
         - pkg: master_deps
+
+gen_master_key:
+  cmd.run:
+    - name: ssh-keygen -f /etc/salt/keys/salt_master -q
+    - require:
+        - file: key_dir
 
 redis-server:
   service.running:
