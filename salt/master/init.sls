@@ -2,6 +2,12 @@
 {% set common_name = salt['pillar.get']('master:cert_common_name', 'localhost') %}
 {% set random_pass = salt['cmd.run']("date | sha512sum | sed 's/\S*\-$//g'") %}
 {% set redis_pass = salt['pillar.get']('redis:password', random_pass) %}
+{% set salt_master_domain = salt['pillar.get']('master:domain', 'salt') %}
+{% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
+{% set aws_access_key = salt['env.get']('aws_access_key', '<your_aws_access_key_here>') %}
+{% set aws_secret_key = salt['env.get']('aws_secret_key', '<your_aws_secret_key_goes_here>') %}
+
+
 
 master_deps:
   pkg.installed:
@@ -85,8 +91,14 @@ aws_base_config:
   file.managed:
     - name: /etc/salt/cloud.providers.d/amazon.conf
     - source: salt://master/aws_config.conf
+    - template: jinja
     - require:
         - file: cloud_provider_dir
+    - context:
+        salt_master_domain: {{ salt_master_domain }}
+        aws_access_key: {{ aws_access_key }}
+        aws_secret_key: {{ aws_secret_key }}
+        aws_security_group: {{ aws_security_group }}
 
 salt-master:
   service.running:
