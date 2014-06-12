@@ -4,10 +4,8 @@
 {% set redis_pass = salt['pillar.get']('redis:password', random_pass) %}
 {% set salt_master_domain = salt['pillar.get']('master:domain', 'salt') %}
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
-{% set aws_access_key = salt['env.get']('aws_access_key', '<your_aws_access_key_here>') %}
-{% set aws_secret_key = salt['env.get']('aws_secret_key', '<your_aws_secret_key_goes_here>') %}
-
-
+{% set aws_access_key = salt['cmd.run']('echo $aws_access_key') %}
+{% set aws_secret_key = salt['cmd.run']('echo $aws_secret_key') %}
 
 master_deps:
   pkg.installed:
@@ -99,6 +97,9 @@ aws_base_config:
         aws_access_key: {{ aws_access_key }}
         aws_secret_key: {{ aws_secret_key }}
         aws_security_group: {{ aws_security_group }}
+        aws_region: {{ salt['pillar.get']('aws:region', '') }}
+        aws_service_url: {{ salt['pillar.get']('aws:service_url', '') }}
+        aws_endpoint: {{ salt['pillar.get']('aws:endpoint', '') }}
 
 salt-master:
   service.running:
@@ -127,11 +128,11 @@ key_dir:
     - require:
         - pkg: master_deps
 
-gen_master_key:
-  cmd.run:
-    - name: ssh-keygen -f /etc/salt/keys/salt_master -q
-    - require:
-        - file: key_dir
+# gen_master_key:
+#   cmd.run:
+#     - name: ssh-keygen -f /etc/salt/keys/salt_master -q
+#     - require:
+#         - file: key_dir
 
 redis-server:
   service.running:
