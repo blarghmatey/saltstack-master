@@ -66,6 +66,7 @@ master_pip:
         - cherrypy
         - halite
         - PyOpenSSL
+        - apache-libcloud
     - require:
         - pkg: python-pip
 
