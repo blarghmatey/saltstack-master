@@ -114,10 +114,16 @@ openstack_base_config:
         salt_master_domain: {{ salt_master_domain }}
         salt_openstack_user: {{ salt['pillar.get']('openstack:user', 'salt') }}
         salt_openstack_password: {{ salt_openstack_password }}
-        default_security_group: {{ default_openstack_security_group }}
         openstack_region: {{ salt['pillar.get']('openstack:region', 'RegionOne') }}
         openstack_identity_domain: {{ salt['pillar.get']('openstack:identity_domain', '{0}:5000'.format(salt_master_domain)) }}
         openstack_project_name: {{ salt['pillar.get']('openstack:project_name', 'admin') }}
+
+openstack_sample_profile:
+  file.managed:
+    - name: /etc/salt/cloud.profiles.d/openstack_sample.conf
+    - source: salt://master/sample_openstack_profile.conf
+    - require:
+        - file: cloud_profile_dir
 
 salt-master:
   service.running:
@@ -148,7 +154,7 @@ key_dir:
 
 gen_master_key:
   cmd.run:
-    - name: ssh-keygen -f /etc/salt/keys/salt_master -q
+    - name: ssh-keygen -f /etc/salt/keys/salt_master -q -N ''
     - require:
         - file: key_dir
 
