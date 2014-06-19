@@ -116,7 +116,7 @@ openstack_base_config:
         salt_openstack_password: {{ salt_openstack_password }}
         default_security_group: {{ default_openstack_security_group }}
         openstack_region: {{ salt['pillar.get']('openstack:region', 'RegionOne') }}
-        openstack_identity_domain: {{ salt['pillar.get']('openstack:identity_domain', {{ salt_master_domain }} + ':5000') }}
+        openstack_identity_domain: {{ salt['pillar.get']('openstack:identity_domain', '{0}:5000'.format(salt_master_domain)) }}
         openstack_project_name: {{ salt['pillar.get']('openstack:project_name', 'admin') }}
 
 salt-master:
