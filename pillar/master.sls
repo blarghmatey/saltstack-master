@@ -1,6 +1,5 @@
 master:
-  domain: 192.168.6.3
+  domain: 10.1.0.14
 
 openstack:
   user: salt
-  
