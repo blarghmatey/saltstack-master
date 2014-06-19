@@ -6,6 +6,7 @@
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
 {% set aws_access_key = salt['cmd.run']('echo $aws_access_key') %}
 {% set aws_secret_key = salt['cmd.run']('echo $aws_secret_key') %}
+{% set salt_openstack_password = salt['cmd.run']('echo $salt_openstack_password') %}
 
 master_deps:
   pkg.installed:
@@ -102,6 +103,22 @@ aws_base_config:
         aws_service_url: {{ salt['pillar.get']('aws:service_url', '') }}
         aws_endpoint: {{ salt['pillar.get']('aws:endpoint', '') }}
 
+openstack_base_config:
+  file.managed:
+    - name: /etc/salt/cloud.providers.d/openstack.conf
+    - source: salt://master/openstack_config.conf
+    - template: jinja
+    - require:
+        - file: cloud_provider_dir
+    - context:
+        salt_master_domain: {{ salt_master_domain }}
+        salt_openstack_user: {{ salt['pillar.get']('openstack:user', 'salt') }}
+        salt_openstack_password: {{ salt_openstack_password }}
+        default_security_group: {{ default_openstack_security_group }}
+        openstack_region: {{ salt['pillar.get']('openstack:region', 'RegionOne') }}
+        openstack_identity_domain: {{ salt['pillar.get']('openstack:identity_domain', {{ salt_master_domain }} + ':5000') }}
+        openstack_project_name: {{ salt['pillar.get']('openstack:project_name', 'admin') }}
+
 salt-master:
   service.running:
     - enable: True
@@ -129,11 +146,11 @@ key_dir:
     - require:
         - pkg: master_deps
 
-# gen_master_key:
-#   cmd.run:
-#     - name: ssh-keygen -f /etc/salt/keys/salt_master -q
-#     - require:
-#         - file: key_dir
+gen_master_key:
+  cmd.run:
+    - name: ssh-keygen -f /etc/salt/keys/salt_master -q
+    - require:
+        - file: key_dir
 
 redis-server:
   service.running:
