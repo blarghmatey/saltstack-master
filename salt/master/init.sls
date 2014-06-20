@@ -172,6 +172,5 @@ redis-server:
         - file: redis_config
 
 salt-minion:
-  service.dead:
-    - require:
-        - service: salt-master
+  service.running:
+    - enabled: True
