@@ -124,11 +124,8 @@ openstack_sample_profile:
   file.managed:
     - name: /etc/salt/cloud.profiles.d/openstack_sample.conf
     - source: salt://master/sample_openstack_profile.conf
-    - template: jinja
     - require:
         - file: cloud_profile_dir
-    - context:
-        public_network_uuid: {{ salt['pillar.get']('openstack:floating_net_uuid', '') }}
 
 salt-master:
   service.running:
