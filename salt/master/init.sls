@@ -115,7 +115,7 @@ openstack_base_config:
         salt_openstack_user: {{ salt['pillar.get']('openstack:user', 'salt') }}
         salt_openstack_password: {{ salt_openstack_password }}
         openstack_region: {{ salt['pillar.get']('openstack:region', 'RegionOne') }}
-        openstack_identity_domain: {{ salt['pillar.get']('openstack:identity_domain', '')) }}
+        openstack_identity_domain: {{ salt['pillar.get']('openstack:identity_domain', '') }}
         openstack_project_name: {{ salt['pillar.get']('openstack:project_name', 'admin') }}
         public_network_uuid: {{ salt['pillar.get']('openstack:floating_net_uuid', '') }}
         private_network_uuid: {{ salt['pillar.get']('openstack:fixed_net_uuid', '') }}
