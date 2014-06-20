@@ -128,7 +128,7 @@ openstack_sample_profile:
     - require:
         - file: cloud_profile_dir
     - context:
-        private_network_uuid: {{ salt['pillar.get']('openstack:fixed_net_uuid', '') }}
+        public_network_uuid: {{ salt['pillar.get']('openstack:floating_net_uuid', '') }}
 
 salt-master:
   service.running:
