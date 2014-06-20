@@ -6,7 +6,7 @@
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
 {% set aws_access_key = salt['cmd.run']('echo $aws_access_key') %}
 {% set aws_secret_key = salt['cmd.run']('echo $aws_secret_key') %}
-{% set salt_openstack_password = salt['cmd.run']('echo $salt_openstack_password') %}
+{% set salt_openstack_password = salt['cmd.run']('echo $OPENSTACK_PASSWORD') %}
 
 master_deps:
   pkg.installed:
@@ -162,6 +162,7 @@ gen_master_key:
     - name: ssh-keygen -f /etc/salt/keys/salt_master -q -N ''
     - require:
         - file: key_dir
+    - unless: cat /etc/salt/keys/salt_master
 
 redis-server:
   service.running:
@@ -173,4 +174,4 @@ redis-server:
 
 salt-minion:
   service.running:
-    - enabled: True
+    - enable: True
