@@ -115,7 +115,7 @@ openstack_base_config:
         salt_openstack_user: {{ salt['pillar.get']('openstack:user', 'salt') }}
         salt_openstack_password: {{ salt_openstack_password }}
         openstack_region: {{ salt['pillar.get']('openstack:region', 'RegionOne') }}
-        openstack_identity_domain: {{ salt['pillar.get']('openstack:identity_domain', '{0}:5000'.format(salt_master_domain)) }}
+        openstack_identity_domain: {{ salt['pillar.get']('openstack:identity_domain', '')) }}
         openstack_project_name: {{ salt['pillar.get']('openstack:project_name', 'admin') }}
         public_network_uuid: {{ salt['pillar.get']('openstack:floating_net_uuid', '') }}
         private_network_uuid: {{ salt['pillar.get']('openstack:fixed_net_uuid', '') }}
@@ -124,8 +124,11 @@ openstack_sample_profile:
   file.managed:
     - name: /etc/salt/cloud.profiles.d/openstack_sample.conf
     - source: salt://master/sample_openstack_profile.conf
+    - template: jinja
     - require:
         - file: cloud_profile_dir
+    - context:
+        private_network_uuid: {{ salt['pillar.get']('openstack:fixed_net_uuid', '') }}
 
 salt-master:
   service.running:
