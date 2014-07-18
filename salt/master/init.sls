@@ -191,11 +191,17 @@ redis-server:
         - file: redis_pass_config
         - file: redis_bind_config
 
-minion_config:
+minion_config_master:
   file.replace:
     - name: /etc/salt/minion
     - pattern: '^.?master:.*?$'
     - repl: 'master: 127.0.0.1'
+
+minion_config_role:
+  file.replace:
+    - name: /etc/salt/minion
+    - pattern: '^.?grains:.*?$'
+    - repl: 'grains:\n  roles:\n    - secretary'
 
 salt-minion:
   service.running:
