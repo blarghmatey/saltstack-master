@@ -4,8 +4,8 @@
 {% set redis_pass = salt['pillar.get']('redis:password', random_pass) %}
 {% set salt_master_domain = salt['pillar.get']('master:domain', 'salt') %}
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
-{% set aws_access_key = salt['cmd.run']('echo $aws_access_key') %}
-{% set aws_secret_key = salt['cmd.run']('echo $aws_secret_key') %}
+{% set aws_access_key = salt['cmd.run']('echo $AWS_ACCESS_KEY') %}
+{% set aws_secret_key = salt['cmd.run']('echo $AWS_SECRET_KEY') %}
 {% set salt_openstack_password = salt['cmd.run']('echo $OPENSTACK_PASSWORD') %}
 
 master_deps:
@@ -14,6 +14,10 @@ master_deps:
         - redis-server
         - python-pip
         - salt-master
+        - build-essential
+        - libssl-dev
+        - python-dev
+        - libffi-dev
 
 master_redis_config:
   file.managed:
@@ -50,13 +54,19 @@ master_halite_config:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
 
-redis_config:
-  file.managed:
+redis_pass_config:
+  file.replace:
     - name: /etc/redis/redis.conf
-    - source: salt://master/redis_config.conf
-    - template: jinja
-    - context:
-        redis_pass: {{ redis_pass }}
+    - pattern: '^.*?masterauth.*?$'
+    - repl: masterauth {{ redis_pass }}
+    - require:
+        - pkg: master_deps
+
+redis_bind_config:
+  file.replace:
+    - name: /etc/redis/redis.conf
+    - pattern: '^.*?bind.*?$'
+    - repl: bind 0.0.0.0
     - require:
         - pkg: master_deps
 
@@ -87,6 +97,7 @@ cloud_profile_dir:
     - name: /etc/salt/cloud.profiles.d
     - makedirs: True
 
+{% if salt['pillar.get']('aws:enable', False) %}
 aws_base_config:
   file.managed:
     - name: /etc/salt/cloud.providers.d/amazon.conf
@@ -103,6 +114,15 @@ aws_base_config:
         aws_service_url: {{ salt['pillar.get']('aws:service_url', '') }}
         aws_endpoint: {{ salt['pillar.get']('aws:endpoint', '') }}
 
+aws_sample_profile:
+  file.managed:
+    - name: /etc/salt/cloud.profiles.d/aws_sample.conf
+    - source: salt://master/sample_aws_profile.conf
+    - require:
+        - file: cloud_profile_dir
+{% endif %}
+
+{% if salt['pillar.get']('openstack:enable', False) %}
 openstack_base_config:
   file.managed:
     - name: /etc/salt/cloud.providers.d/openstack.conf
@@ -126,6 +146,7 @@ openstack_sample_profile:
     - source: salt://master/sample_openstack_profile.conf
     - require:
         - file: cloud_profile_dir
+{% endif %}
 
 salt-master:
   service.running:
@@ -167,7 +188,14 @@ redis-server:
     - require:
         - pkg: master_deps
     - watch:
-        - file: redis_config
+        - file: redis_pass_config
+        - file: redis_bind_config
+
+minion_config:
+  file.replace:
+    - name: /etc/salt/minion
+    - pattern: '^.?master:.*?$'
+    - repl: 'master: 127.0.0.1'
 
 salt-minion:
   service.running:
