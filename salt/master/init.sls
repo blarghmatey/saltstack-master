@@ -206,3 +206,11 @@ minion_config_role:
 salt-minion:
   service.running:
     - enable: True
+    - watch:
+        - service: salt-master
+
+salt-minion-key:
+  cmd.run:
+    - name: salt-key -A -y
+    - watch:
+        - service: salt-minion
