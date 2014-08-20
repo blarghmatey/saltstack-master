@@ -2,7 +2,7 @@
 {% set common_name = salt['pillar.get']('master:cert_common_name', 'localhost') %}
 {% set random_pass = salt['cmd.run']("date | sha512sum | sed 's/\S*\-$//g'") %}
 {% set redis_pass = salt['pillar.get']('redis:password', random_pass) %}
-{% set salt_master_domain = salt['pillar.get']('master:domain', 'salt') %}
+{% set salt_master_domain = salt['grains.get']('ip_interfaces:eth0', 'salt') %}
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
 {% set aws_access_key = salt['cmd.run']('echo $AWS_ACCESS_KEY') %}
 {% set aws_secret_key = salt['cmd.run']('echo $AWS_SECRET_KEY') %}
@@ -212,5 +212,5 @@ salt-minion:
 salt-minion-key:
   cmd.run:
     - name: salt-key -A -y
-    - watch:
+    - require:
         - service: salt-minion
