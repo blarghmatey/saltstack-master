@@ -74,7 +74,7 @@ master_pip:
   pip.installed:
     - names:
         - redis
-        - cherrypy
+        - paste
         - halite
         - PyOpenSSL
         - apache-libcloud
@@ -211,6 +211,6 @@ salt-minion:
 
 salt-minion-key:
   cmd.run:
-    - name: salt-key -A -y
-    - require:
+    - name: sleep 10; salt-key -A -y
+    - watch:
         - service: salt-minion
