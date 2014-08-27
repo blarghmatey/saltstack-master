@@ -6,7 +6,7 @@
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
 {% set aws_access_key = salt['cmd.run']('echo $AWS_ACCESS_KEY') %}
 {% set aws_secret_key = salt['cmd.run']('echo $AWS_SECRET_KEY') %}
-{% set salt_openstack_password = salt['env.get']('OPENSTACK_PASSWORD', '') %}
+{% set salt_openstack_password = salt['cmd.run']('echo $OPENSTACK_PASSWORD') %}
 
 master_deps:
   pkg.installed:

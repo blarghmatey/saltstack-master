@@ -2,10 +2,11 @@
 
 if [ -z `which salt-minion` ]
 then
-    wget -O - http://bootstrap.saltstack.org | sudo sh
+    wget -O - http://bootstrap.saltstack.org | sudo bash
 fi
 sudo mkdir -p /srv/salt
 sudo mkdir -p /srv/pillar
+sudo mkdir -p /srv/formulas
 sudo cp -r salt/* /srv/salt
 sudo cp -r pillar/* /srv/pillar
 sudo cp minion.conf /etc/salt/minion.d/minion.conf

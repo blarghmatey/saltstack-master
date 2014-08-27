@@ -4,8 +4,8 @@ master:
 openstack:
   enable: True
   user: salt
-  floating_net_uuid: 26e672b2-c193-43c9-8950-8d9e4c546c80
-  fixed_net_uuid: 05784a17-73d2-4732-94fc-ca33b8f244b1
+  floating_net_uuid: 0cbbbdbb-e5bc-405e-8f5f-7cfafe1c2702
+  fixed_net_uuid: 5b75eeaf-6d7e-47e4-bbf0-354bddeb1221
   identity_domain: 192.168.5.1:5000
 
 aws:
