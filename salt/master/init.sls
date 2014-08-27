@@ -2,7 +2,7 @@
 {% set common_name = salt['pillar.get']('master:cert_common_name', 'localhost') %}
 {% set random_pass = salt['cmd.run']("date | sha512sum | sed 's/\S*\-$//g'") %}
 {% set redis_pass = salt['pillar.get']('redis:password', random_pass) %}
-{% set salt_master_domain = salt['grains.get']('ip_interfaces:eth0[0]', 'salt') %}
+{% set salt_master_domain = salt['grains.get']('ip_interfaces:eth0', ['salt'])[0] %}
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
 {% set aws_access_key = salt['cmd.run']('echo $AWS_ACCESS_KEY') %}
 {% set aws_secret_key = salt['cmd.run']('echo $AWS_SECRET_KEY') %}
@@ -19,6 +19,7 @@ master_deps:
         - python-dev
         - libffi-dev
         - salt-cloud
+        - salt-doc
 
 master_redis_config:
   file.managed:
