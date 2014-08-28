@@ -32,8 +32,8 @@ print(extra_args)
 cls = get_driver(provider_dict[args.provider])
 driver = cls(args.username, args.password, **extra_args)
 
-keypairs = driver.list_keypairs()
+keypairs = driver.list_key_pairs()
 for keyobj in keypairs:
     if keyobj.name == args.name:
-        driver.delete_keypair(keyobj)
-driver.import_key_pair_from_file(args.key)
+        driver.delete_key_pair(keyobj)
+driver.import_key_pair_from_file(args.keyname, args.key)
