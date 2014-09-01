@@ -6,7 +6,7 @@
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
 {% set aws_access_key = salt['cmd.run']('echo $AWS_ACCESS_KEY') %}
 {% set aws_secret_key = salt['cmd.run']('echo $AWS_SECRET_KEY') %}
-{% set salt_openstack_password = salt['cmd.run']('echo $OPENSTACK_PASSWORD') %}
+{% set salt_openstack_password = salt['pillar.get']('openstack:password', '') %}
 
 master_deps:
   pkg.installed:
@@ -59,8 +59,8 @@ master_halite_config:
 redis_pass_config:
   file.replace:
     - name: /etc/redis/redis.conf
-    - pattern: '^.*?masterauth.*?$'
-    - repl: masterauth {{ redis_pass }}
+    - pattern: '^.*?requirepass.*?$'
+    - repl: requirepass {{ redis_pass }}
     - require:
         - pkg: master_deps
 
