@@ -28,6 +28,8 @@ master_redis_config:
     - template: jinja
     - require:
         - pkg: salt-master
+    - watch:
+        - file: redis_pass_config
     - context:
         redis_pass: {{ redis_pass }}
 
@@ -59,7 +61,7 @@ master_halite_config:
 redis_pass_config:
   file.replace:
     - name: /etc/redis/redis.conf
-    - pattern: '^.*?requirepass.*?$'
+    - pattern: '^\s*#\s*requirepass.*?$'
     - repl: requirepass {{ redis_pass }}
     - require:
         - pkg: master_deps
