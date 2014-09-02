@@ -90,7 +90,7 @@ master_mongo_config:
         - service: salt-master
     - context:
         mongo_host: {{ mongo_host }}
-        mongo_pass: {{ mongo_password }}
+        mongo_password: {{ mongo_password }}
         mongo_db: {{ mongo_db }}
         mongo_user: {{ mongo_user }}
 
@@ -127,6 +127,12 @@ mongo_service:
         - file: mongo_bind_config
     - require:
         - pkg: mongodb-server
+
+mongo_admin_user:
+  cmd.wait:
+    - name: mongo --eval 'use admin; db.addUser({user:"admin", pwd: "{{ salt['pillar.get']('master_mongo:admin_password', mongo_password) }}", roles: ["userAdminAnyDatabase"]})'
+    - watch:
+        - pkg: mongodb-server
 {% endif %}
 
 mongo_salt_user:
@@ -134,8 +140,9 @@ mongo_salt_user:
     - name: {{ mongo_user }}
     - passwd: {{ mongo_password }}
     - user: {{ salt['pillar.get']('master_mongo:admin_user', 'admin') }}
-    - password: {{ salt['pillar.get']('master_mongo:admin_password', '') }}
+    - password: {{ salt['pillar.get']('master_mongo:admin_password', mongo_password) }}
     - host: {{ mongo_host }}
+    - port: 27017
     - database: {{ mongo_db }}
 {% endif %}
 
