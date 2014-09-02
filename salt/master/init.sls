@@ -1,17 +1,18 @@
 {% set tls_dir = salt['pillar.get']('master:tls_dir', 'tls') %}
 {% set common_name = salt['pillar.get']('master:cert_common_name', 'localhost') %}
 {% set random_pass = salt['cmd.run']("uname -a | sha512sum | sed 's/\S*\-$//g'") %}
-{% set redis_pass = salt['pillar.get']('redis:password', random_pass) %}
+{% set pillar_pass = salt['pillar.get']('master:ext_pillar:password', random_pass) %}
 {% set salt_master_domain = salt['grains.get']('ip_interfaces:eth0', ['salt'])[0] %}
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
 {% set aws_access_key = salt['cmd.run']('echo $AWS_ACCESS_KEY') %}
 {% set aws_secret_key = salt['cmd.run']('echo $AWS_SECRET_KEY') %}
 {% set salt_openstack_password = salt['pillar.get']('openstack:password', '') %}
+{% set ext_pillar_type = salt['pillar.get']('master:ext_pillar:type', 'mongo') %}
+{% set ext_pillar_location = salt['pillar.get']('master:ext_pillar:location', 'localhost') %}
 
 master_deps:
   pkg.installed:
     - names:
-        - redis-server
         - python-pip
         - salt-master
         - build-essential
@@ -21,6 +22,7 @@ master_deps:
         - salt-cloud
         - salt-doc
 
+{% if ext_pillar_type == 'redis' %}
 master_redis_config:
   file.managed:
     - name: /etc/salt/master.d/redis.conf
@@ -30,7 +32,98 @@ master_redis_config:
         - pkg: salt-master
     - context:
         redis_host: {{ salt['pillar.get']('master_redis:host', salt_master_domain) }}
-        redis_pass: {{ redis_pass }}
+        redis_pass: {{ pillar_pass }}
+
+{% if ext_pillar_location == 'localhost' %}
+redis-server:
+  pkg.installed
+
+redis_pass_config:
+  file.replace:
+    - name: /etc/redis/redis.conf
+    - pattern: '^\s*#\s*requirepass.*?$'
+    - repl: requirepass {{ pillar_pass }}
+    - require:
+        - pkg: redis-server
+
+redis_bind_config:
+  file.replace:
+    - name: /etc/redis/redis.conf
+    - pattern: '^.*?bind.*?$'
+    - repl: bind 0.0.0.0
+    - require:
+        - pkg: redis-server
+
+redis-server:
+  service.running:
+    - enable: True
+    - require:
+        - pkg: master_deps
+    - watch:
+        - file: redis_pass_config
+        - file: redis_bind_config
+
+{% endif %}
+{% endif %}
+
+{% if ext_pillar_type == 'mongo' %}
+{% set mongo_user = salt['pillar.get']('master_mongo:user', 'salt') %}
+{% set mongo_password = salt['pillar.get']('master_mongo:password', pillar_pass) %}
+{% set mongo_host = salt['pillar.get']('master_mongo:host', salt_master_domain) %}
+{% set mongo_db = salt['pillar.get']('master_mongo:database', 'salt') %}
+
+master_mongo_config:
+  file.managed:
+    - name: /etc/salt/master.d/mongo.conf
+    - source: salt://master/master_mongo.conf
+    - template: jinja
+    - require:
+        - pkg: salt-master
+    - context:
+        mongo_host: {{ mongo_host }}
+        mongo_pass: {{ mongo_password }}
+        mongo_db: {{ mongo_db }}
+        mongo_user: {{ mongo_user }}
+
+{% if ext_pillar_location == 'localhost' %}
+mongodb-server:
+  pkg.installed
+
+mongo_bind_config:
+  file.replace:
+    - name: /etc/mongodb.conf
+    - pattern: '^.*?bind_ip.*?$'
+    - repl: bind_ip = 0.0.0.0
+    - require:
+        - pkg: mongodb-server
+
+mongo_enable_auth:
+  file.uncomment:
+    - name: /etc/mongodb.conf
+    - regex: ^auth\s*\=\s*true
+    - require:
+        - pkg: mongodb-server
+
+mongo_service:
+  service.running:
+    - enable: True
+    - name: mongodb
+    - watch:
+        - file: mongo_enable_auth
+        - file: mongo_bind_config
+    - require:
+        - pkg: mongodb-server
+{% endif %}
+
+mongo_salt_user:
+  mongodb_user.present:
+    - name: {{ mongo_user }}
+    - passwd: {{ mongo_password }}
+    - user: {{ salt['pillar.get']('master_mongo:admin_user', 'admin') }}
+    - password: {{ salt['pillar.get']('master_mongo:admin_password', '') }}
+    - host: {{ mongo_host }}
+    - database: {{ mongo_db }}
+{% endif %}
 
 master_gitfs_config:
   file.managed:
@@ -57,21 +150,6 @@ master_halite_config:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
 
-redis_pass_config:
-  file.replace:
-    - name: /etc/redis/redis.conf
-    - pattern: '^\s*#\s*requirepass.*?$'
-    - repl: requirepass {{ redis_pass }}
-    - require:
-        - pkg: master_deps
-
-redis_bind_config:
-  file.replace:
-    - name: /etc/redis/redis.conf
-    - pattern: '^.*?bind.*?$'
-    - repl: bind 0.0.0.0
-    - require:
-        - pkg: master_deps
 
 master_pip:
   pip.installed:
@@ -184,15 +262,6 @@ gen_master_key:
     - require:
         - file: key_dir
     - unless: cat /etc/salt/keys/salt_master
-
-redis-server:
-  service.running:
-    - enable: True
-    - require:
-        - pkg: master_deps
-    - watch:
-        - file: redis_pass_config
-        - file: redis_bind_config
 
 minion_config_master:
   file.replace:
