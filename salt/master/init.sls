@@ -1,6 +1,6 @@
 {% set tls_dir = salt['pillar.get']('master:tls_dir', 'tls') %}
 {% set common_name = salt['pillar.get']('master:cert_common_name', 'localhost') %}
-{% set random_pass = salt['cmd.run']("date | sha512sum | sed 's/\S*\-$//g'") %}
+{% set random_pass = salt['cmd.run']("uname -a | sha512sum | sed 's/\S*\-$//g'") %}
 {% set redis_pass = salt['pillar.get']('redis:password', random_pass) %}
 {% set salt_master_domain = salt['grains.get']('ip_interfaces:eth0', ['salt'])[0] %}
 {% set aws_security_group = salt['pillar.get']('aws:security_group', 'default') %}
@@ -28,9 +28,8 @@ master_redis_config:
     - template: jinja
     - require:
         - pkg: salt-master
-    - watch:
-        - file: redis_pass_config
     - context:
+        redis_host: {{ salt['pillar.get']('master_redis:host', salt_master_domain) }}
         redis_pass: {{ redis_pass }}
 
 master_gitfs_config:
