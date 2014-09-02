@@ -30,9 +30,16 @@ master_redis_config:
     - template: jinja
     - require:
         - pkg: salt-master
+    - watch_in:
+        - service: salt-master
     - context:
         redis_host: {{ salt['pillar.get']('master_redis:host', salt_master_domain) }}
         redis_pass: {{ pillar_pass }}
+
+redis:
+  pip.installed:
+    - require:
+        - pkg: master_deps
 
 {% if ext_pillar_location == 'localhost' %}
 redis-server:
@@ -79,11 +86,18 @@ master_mongo_config:
     - template: jinja
     - require:
         - pkg: salt-master
+    - watch_in:
+        - service: salt-master
     - context:
         mongo_host: {{ mongo_host }}
         mongo_pass: {{ mongo_password }}
         mongo_db: {{ mongo_db }}
         mongo_user: {{ mongo_user }}
+
+pymongo:
+  pip.installed:
+    - require:
+        - pkg: master_deps
 
 {% if ext_pillar_location == 'localhost' %}
 mongodb-server:
@@ -154,7 +168,6 @@ master_halite_config:
 master_pip:
   pip.installed:
     - names:
-        - redis
         - cherrypy
         - halite
         - PyOpenSSL
@@ -236,7 +249,6 @@ salt-master:
         - pkg: master_deps
     - watch:
         - file: master_halite_config
-        - file: master_redis_config
         - file: master_gitfs_config
         - file: cloud_provider_dir
 
