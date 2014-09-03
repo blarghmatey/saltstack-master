@@ -129,21 +129,19 @@ mongo_service:
         - pkg: mongodb-server
 
 mongo_admin_user:
-  cmd.wait:
-    - name: mongo --eval 'use admin; db.addUser({user:"admin", pwd: "{{ salt['pillar.get']('master_mongo:admin_password', mongo_password) }}", roles: ["userAdminAnyDatabase"]})'
-    - watch:
-        - pkg: mongodb-server
+  cmd.run:
+    - name: "mongo --eval 'use admin\n db.addUser({user:"admin", pwd: "{{ salt['pillar.get']('master_mongo:admin_password', mongo_password) }}", roles: ["userAdminAnyDatabase"]})'"
+    - require:
+        - service: mongo_service
+    - unless: "mongo --eval 'use admin; show users' | grep -i admin"
 {% endif %}
 
 mongo_salt_user:
-  mongodb_user.present:
-    - name: {{ mongo_user }}
-    - passwd: {{ mongo_password }}
-    - user: {{ salt['pillar.get']('master_mongo:admin_user', 'admin') }}
-    - password: {{ salt['pillar.get']('master_mongo:admin_password', mongo_password) }}
-    - host: {{ mongo_host }}
-    - port: 27017
-    - database: {{ mongo_db }}
+  cmd.run:
+    - name: "mongo --eval 'db.addUser({user: "{{ mongo_user }}", pwd: "{{ mongo_password }}", roles: [{role: "dbAdmin", db: {{ mongo_db }}]})'"
+    - require:
+        - cmd: mongo_admin_user
+    - unless: "mongo --eval 'use {{ mongo_db }}; show users' | grep -i {{ mongo_user }}"
 {% endif %}
 
 master_gitfs_config:
