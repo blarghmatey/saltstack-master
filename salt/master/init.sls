@@ -19,6 +19,7 @@ master_deps:
         - python-dev
         - libffi-dev
         - salt-doc
+        - python-git
 
 master_config_dir:
   file.directory:
@@ -149,7 +150,6 @@ master_pip:
         - halite
         - PyOpenSSL
         - apache-libcloud
-        - GitPython
     - require:
         - pkg: master_deps
 
