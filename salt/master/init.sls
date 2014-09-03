@@ -149,6 +149,7 @@ master_pip:
         - halite
         - PyOpenSSL
         - apache-libcloud
+        - GitPython
     - require:
         - pkg: master_deps
 
