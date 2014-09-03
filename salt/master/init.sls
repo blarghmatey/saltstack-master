@@ -64,6 +64,7 @@ redis_bind_config:
 
 redis-server-service:
   service.running:
+    - name: redis-server
     - enable: True
     - require:
         - pkg: master_deps
@@ -149,7 +150,7 @@ master_pip:
         - PyOpenSSL
         - apache-libcloud
     - require:
-        - pkg: python-pip
+        - pkg: master_deps
 
 master_certs:
   module.run:
