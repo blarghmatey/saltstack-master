@@ -111,37 +111,15 @@ mongo_bind_config:
     - require:
         - pkg: mongodb-server
 
-mongo_enable_auth:
-  file.uncomment:
-    - name: /etc/mongodb.conf
-    - regex: ^auth\s*\=\s*true
-    - require:
-        - pkg: mongodb-server
-
 mongo_service:
   service.running:
     - enable: True
     - name: mongodb
     - watch:
-        - file: mongo_enable_auth
         - file: mongo_bind_config
     - require:
         - pkg: mongodb-server
-
-mongo_admin_user:
-  cmd.run:
-    - name: "mongo --eval 'use admin\n db.addUser({user:"admin", pwd: "{{ salt['pillar.get']('master_mongo:admin_password', mongo_password) }}", roles: ["userAdminAnyDatabase"]})'"
-    - require:
-        - service: mongo_service
-    - unless: "mongo --eval 'use admin; show users' | grep -i admin"
 {% endif %}
-
-mongo_salt_user:
-  cmd.run:
-    - name: "mongo --eval 'db.addUser({user: "{{ mongo_user }}", pwd: "{{ mongo_password }}", roles: [{role: "dbAdmin", db: {{ mongo_db }}]})'"
-    - require:
-        - cmd: mongo_admin_user
-    - unless: "mongo --eval 'use {{ mongo_db }}; show users' | grep -i {{ mongo_user }}"
 {% endif %}
 
 master_gitfs_config:
