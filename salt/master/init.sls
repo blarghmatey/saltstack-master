@@ -7,14 +7,13 @@
 {% set aws_access_key = salt['cmd.run']('echo $AWS_ACCESS_KEY') %}
 {% set aws_secret_key = salt['cmd.run']('echo $AWS_SECRET_KEY') %}
 {% set salt_openstack_password = salt['pillar.get']('openstack:password', '') %}
-{% set ext_pillar_type = salt['pillar.get']('master:ext_pillar:type', 'mongo') %}
+{% set ext_pillar_type = salt['pillar.get']('master:ext_pillar:type', 'redis') %}
 {% set ext_pillar_location = salt['pillar.get']('master:ext_pillar:location', 'localhost') %}
 
 master_deps:
   pkg.installed:
     - names:
         - python-pip
-        - salt-master
         - build-essential
         - libssl-dev
         - python-dev
@@ -61,7 +60,7 @@ redis_bind_config:
     - require:
         - pkg: redis-server
 
-redis-server:
+redis-server-service:
   service.running:
     - enable: True
     - require:

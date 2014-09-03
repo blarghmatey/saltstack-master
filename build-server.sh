@@ -2,7 +2,8 @@
 
 if [ -z `which salt-minion` ]
 then
-    wget -O - http://bootstrap.saltstack.org | sudo bash
+    curl -o install_salt.sh -L https://bootstrap.saltstack.com
+    sudo sh install_salt.sh -M git v2014.7
 fi
 sudo mkdir -p /srv/salt
 sudo mkdir -p /srv/pillar
