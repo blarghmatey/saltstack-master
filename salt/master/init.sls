@@ -12,13 +12,12 @@
 
 master_deps:
   pkg.installed:
-    - names:
+    - pkgs:
         - python-pip
         - build-essential
         - libssl-dev
         - python-dev
         - libffi-dev
-        - salt-cloud
         - salt-doc
 
 {% if ext_pillar_type == 'redis' %}
@@ -27,8 +26,6 @@ master_redis_config:
     - name: /etc/salt/master.d/redis.conf
     - source: salt://master/master_redis.conf
     - template: jinja
-    - require:
-        - pkg: salt-master
     - watch_in:
         - service: salt-master
     - context:
