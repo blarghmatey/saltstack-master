@@ -1,3 +1,4 @@
+{% from "master/map.jinja" import salt_master with context %}
 {% set tls_dir = salt['pillar.get']('master:tls_dir', 'tls') %}
 {% set common_name = salt['pillar.get']('master:cert_common_name', 'localhost') %}
 {% set random_pass = salt['cmd.run']("uname -a | sha512sum | sed 's/\S*\-$//g'") %}
@@ -12,14 +13,7 @@
 
 master_deps:
   pkg.installed:
-    - pkgs:
-        - python-pip
-        - build-essential
-        - libssl-dev
-        - python-dev
-        - libffi-dev
-        - salt-doc
-        - python-git
+    - pkgs: {{ salt_master.pkgs }}
 
 master_config_dir:
   file.directory:
@@ -45,7 +39,8 @@ redis:
 
 {% if ext_pillar_location == 'localhost' %}
 redis-server:
-  pkg.installed
+  pkg.installed:
+    - name: {{ salt_master.redis_pkg }}
 
 redis_pass_config:
   file.replace:
@@ -102,7 +97,8 @@ pymongo:
 
 {% if ext_pillar_location == 'localhost' %}
 mongodb-server:
-  pkg.installed
+  pkg.installed:
+    - name: {{ salt_master.mongo_pkg }}
 
 mongo_bind_config:
   file.replace:

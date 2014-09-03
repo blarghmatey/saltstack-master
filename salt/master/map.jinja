@@ -1,0 +1,34 @@
+{% set salt_master = salt['grains.filter_by']({
+    'Debian': {
+        'pkgs': [
+            'python-pip',
+            'build-essential',
+            'libssl-dev',
+            'python-dev',
+            'libffi-dev',
+            'salt-doc',
+            'python-git'
+        ],
+        'redis_pkg': 'redis-server',
+        'mongo_pkg': 'mongodb-server'
+    },
+    'RedHat': {
+        'pkgs': [
+            'gcc',
+            'gcc-c++',
+            'make',
+            'automake',
+            'python-devel',
+            'python-dulwich',
+            'python-pip',
+            'openssl-devel',
+            'libffi-devel'
+        ],
+        'redis_pkg': 'redis',
+        'mongo_pkg': 'mongodb'
+    },
+    'Arch': {
+        'pkgs': [
+        ]
+    }
+}, merge=salt['pillar.get']('salt_master:lookup')) %}
