@@ -3,7 +3,7 @@
 if [ -z `which salt-minion` ]
 then
     curl -o install_salt.sh -L https://bootstrap.saltstack.com
-    sudo sh install_salt.sh -M git v2014.7
+    sudo sh install_salt.sh -M git develop
 fi
 sudo mkdir -p /srv/salt
 sudo mkdir -p /srv/pillar
