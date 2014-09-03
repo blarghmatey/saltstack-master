@@ -20,6 +20,11 @@ master_deps:
         - libffi-dev
         - salt-doc
 
+master_config_dir:
+  file.directory:
+    - name: /etc/salt/master.d
+    - makedirs: True
+
 {% if ext_pillar_type == 'redis' %}
 master_redis_config:
   file.managed:
@@ -80,8 +85,6 @@ master_mongo_config:
     - name: /etc/salt/master.d/mongo.conf
     - source: salt://master/master_mongo.conf
     - template: jinja
-    - require:
-        - pkg: salt-master
     - watch_in:
         - service: salt-master
     - context:
@@ -122,23 +125,17 @@ master_gitfs_config:
   file.managed:
     - name: /etc/salt/master.d/gitfs.conf
     - source: salt://master/master_gitfs.conf
-    - require:
-        - pkg: salt-master
 
 master_state_config:
   file.append:
     - name: /etc/salt/master
     - text: 'state_output: changes'
-    - require:
-        - pkg: salt-master
 
 master_halite_config:
   file.managed:
     - name: /etc/salt/master.d/halite.conf
     - source: salt://master/halite.conf
     - template: jinja
-    - require:
-        - pkg: salt-master
     - context:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
