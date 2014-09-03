@@ -20,6 +20,11 @@ master_config_dir:
     - name: /etc/salt/master.d
     - makedirs: True
 
+add_pillar:
+  file.append:
+    - name: /srv/pillar/top.sls
+    - text: '    - external'
+
 {% if ext_pillar_type == 'redis' %}
 master_redis_config:
   file.managed:
@@ -36,6 +41,15 @@ redis:
   pip.installed:
     - require:
         - pkg: master_deps
+
+redis_sls:
+  file.managed:
+    - name: /srv/pillar/external.sls
+    - source: salt://master/redis.sls
+    - context:
+        redis_host: {{ ext_pillar_location }}
+        redis_db: 0
+        redis_password: {{ pillar_pass }}
 
 {% if ext_pillar_location == 'localhost' %}
 redis-server:
