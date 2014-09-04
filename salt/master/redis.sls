@@ -4,8 +4,8 @@ import redis
 
 
 def run():
-    client = redis.Redis(host={{ redis_host }}, db={{ redis_db }},
-                         password={{ redis_password }})
+    client = redis.Redis(host='{{ redis_host }}', db={{ redis_db }},
+                         password='{{ redis_password }}')
     keys = client.keys()
     data = {}
     for key in keys:
