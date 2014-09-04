@@ -46,6 +46,7 @@ redis_sls:
   file.managed:
     - name: /srv/pillar/external.sls
     - source: salt://master/redis.sls
+    - template: jinja
     - context:
         redis_host: {{ ext_pillar_location }}
         redis_db: 0
