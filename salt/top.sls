@@ -1,3 +1,4 @@
 base:
-  'role:secretary':
+  'roles:secretary':
+    - match: grain
     - master

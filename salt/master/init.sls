@@ -29,7 +29,7 @@ add_pillar:
 master_redis_config:
   file.managed:
     - name: /etc/salt/master.d/redis.conf
-    - source: salt://master/master_redis.conf
+    - source: salt://master/files/master_redis.conf
     - template: jinja
     - watch_in:
         - service: salt-master
@@ -45,7 +45,7 @@ redis:
 redis_sls:
   file.managed:
     - name: /srv/pillar/external.sls
-    - source: salt://master/redis.sls
+    - source: salt://master/files/redis.sls
     - template: jinja
     - context:
         redis_host: {{ ext_pillar_location }}
@@ -95,7 +95,7 @@ redis-server-service:
 master_mongo_config:
   file.managed:
     - name: /etc/salt/master.d/mongo.conf
-    - source: salt://master/master_mongo.conf
+    - source: salt://master/files/master_mongo.conf
     - template: jinja
     - watch_in:
         - service: salt-master
@@ -137,7 +137,7 @@ mongo_service:
 master_gitfs_config:
   file.managed:
     - name: /etc/salt/master.d/gitfs.conf
-    - source: salt://master/master_gitfs.conf
+    - source: salt://master/files/master_gitfs.conf
 
 master_state_config:
   file.append:
@@ -147,7 +147,7 @@ master_state_config:
 master_halite_config:
   file.managed:
     - name: /etc/salt/master.d/halite.conf
-    - source: salt://master/halite.conf
+    - source: salt://master/files/halite.conf
     - template: jinja
     - context:
         tls_dir: {{ tls_dir }}
@@ -184,7 +184,7 @@ cloud_profile_dir:
 aws_base_config:
   file.managed:
     - name: /etc/salt/cloud.providers.d/amazon.conf
-    - source: salt://master/aws_config.conf
+    - source: salt://master/files/aws_config.conf
     - template: jinja
     - require:
         - file: cloud_provider_dir
@@ -200,7 +200,7 @@ aws_base_config:
 aws_sample_profile:
   file.managed:
     - name: /etc/salt/cloud.profiles.d/aws_sample.conf
-    - source: salt://master/sample_aws_profile.conf
+    - source: salt://master/files/sample_aws_profile.conf
     - require:
         - file: cloud_profile_dir
 {% endif %}
@@ -209,7 +209,7 @@ aws_sample_profile:
 openstack_base_config:
   file.managed:
     - name: /etc/salt/cloud.providers.d/openstack.conf
-    - source: salt://master/openstack_config.conf
+    - source: salt://master/files/openstack_config.conf
     - template: jinja
     - require:
         - file: cloud_provider_dir
@@ -226,7 +226,7 @@ openstack_base_config:
 openstack_sample_profile:
   file.managed:
     - name: /etc/salt/cloud.profiles.d/openstack_sample.conf
-    - source: salt://master/sample_openstack_profile.conf
+    - source: salt://master/files/sample_openstack_profile.conf
     - require:
         - file: cloud_profile_dir
 {% endif %}

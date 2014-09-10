@@ -10,4 +10,5 @@ sudo mkdir -p /srv/pillar
 sudo mkdir -p /srv/formulas
 sudo cp -r salt/* /srv/salt
 sudo cp -r pillar/* /srv/pillar
+sudo cp minion.conf /etc/salt/minion.d/minion.conf
 sudo salt-call --local state.highstate
