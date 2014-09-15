@@ -190,8 +190,8 @@ aws_base_config:
         - file: cloud_provider_dir
     - context:
         salt_master_domain: {{ salt_master_domain }}
-        aws_access_key: {{ aws_access_key }}
-        aws_secret_key: {{ aws_secret_key }}
+        aws_access_key: {{ salt['pillar.get']('aws:access_key', aws_access_key) }}
+        aws_secret_key: {{ salt['pillar.get']('aws:secret_key', aws_secret_key) }}
         aws_security_group: {{ aws_security_group }}
         aws_region: {{ salt['pillar.get']('aws:region', '') }}
         aws_service_url: {{ salt['pillar.get']('aws:service_url', '') }}
