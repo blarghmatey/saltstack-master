@@ -10,6 +10,7 @@
 {% set salt_openstack_password = salt['pillar.get']('openstack:password', '') %}
 {% set ext_pillar_type = salt['pillar.get']('master:ext_pillar:type', 'redis') %}
 {% set ext_pillar_location = salt['pillar.get']('master:ext_pillar:location', 'localhost') %}
+{% set halite_user = salt['pillar.get']('master:halite:username', 'salt') %}
 
 master_deps:
   pkg.installed:
@@ -152,7 +153,10 @@ master_halite_config:
     - context:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
+        halite_user: {{ halite_user }}
 
+{{ halite_user }}:
+  user.present
 
 master_pip:
   pip.installed:
@@ -263,6 +267,16 @@ gen_master_key:
     - require:
         - file: key_dir
     - unless: cat /etc/salt/keys/salt_master
+
+tls_dir:
+  file.directory:
+    - name: /etc/salt/pki/{{ tls_dir }}/certs
+    - makedirs: True
+
+make_self_signed_certs:
+  module.run:
+    - name: tls.create_self_signed_cert
+    - tls_dir: {{ tls_dir }}
 
 minion_config_master:
   file.replace:
