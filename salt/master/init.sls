@@ -1,6 +1,6 @@
 {% from "master/map.jinja" import salt_master with context %}
 {% set tls_dir = salt['pillar.get']('master:tls_dir', 'tls') %}
-{% set common_name = salt['pillar.get']('master:cert_common_name', 'localhost') %}
+{% set common_name = salt['pillar.get']('master:cert_common_name', 'salt') %}
 {% set random_pass = salt['cmd.run']("uname -a | sha512sum | sed 's/\S*\-$//g'") %}
 {% set pillar_pass = salt['pillar.get']('master:ext_pillar:password', random_pass) %}
 {% set salt_master_domain = salt['grains.get']('ip_interfaces:eth0', ['salt'])[0] %}
@@ -145,6 +145,11 @@ master_state_config:
     - name: /etc/salt/master
     - text: 'state_output: changes'
 
+make_self_signed_certs:
+  module.run:
+    - name: tls.create_self_signed_cert
+    - tls_dir: {{ tls_dir }}
+
 master_halite_config:
   file.managed:
     - name: /etc/salt/master.d/halite.conf
@@ -154,9 +159,20 @@ master_halite_config:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
         halite_user: {{ halite_user }}
+    - require:
+        - module: make_self_signed_certs
 
 {{ halite_user }}:
   user.present
+
+master_api_config:
+  file.managed:
+    - name: /etc/salt/master.d/netapi.conf
+    - source: salt://master/files/netapi.conf
+    - template: jinja
+    - context:
+        tls_dir: {{ tls_dir }}
+        common_name: {{ common_name }}
 
 master_pip:
   pip.installed:
@@ -267,16 +283,6 @@ gen_master_key:
     - require:
         - file: key_dir
     - unless: cat /etc/salt/keys/salt_master
-
-tls_dir:
-  file.directory:
-    - name: /etc/salt/pki/{{ tls_dir }}/certs
-    - makedirs: True
-
-make_self_signed_certs:
-  module.run:
-    - name: tls.create_self_signed_cert
-    - tls_dir: {{ tls_dir }}
 
 minion_config_master:
   file.replace:
