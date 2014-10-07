@@ -182,10 +182,14 @@ master_api_config:
 /etc/init/saltapi.conf:
   file.managed:
     - source: salt://nginx/files/saltapi.upstart
+    - require_in:
+        - service: saltapi
 {% else %}
 /usr/lib/systemd/system/saltapi.service:
   file.managed:
     - source: salt://master/files/saltapi.systemd
+    - require_in:
+        - service: saltapi
 {% endif %}
 
 master_pip:
@@ -315,7 +319,6 @@ saltapi:
   service.running:
     - enable: True
     - require:
-        - file: /usr/lib/systemd/system/saltapi.service
         - file: master_api_config
 
 salt-minion-key:
