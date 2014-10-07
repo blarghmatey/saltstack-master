@@ -1,0 +1,12 @@
+[Unit]
+Description=Saltstack API for generating reactor events and querying state
+After=syslog.target network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/saltapi.pid
+ExecStart=/usr/local/bin/salt-api --pid-file=$PIDFile -d
+ExecStop=/bin/kill `/bin/cat $PIDFile`
+
+[Install]
+WantedBy=multi-user.target

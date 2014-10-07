@@ -150,6 +150,12 @@ make_self_signed_certs:
     - name: tls.create_self_signed_cert
     - tls_dir: {{ tls_dir }}
 
+make_halite_pem:
+  cmd.run:
+    - name: cat /etc/pki/tls/{{ tls_dir }}/certs/{{ common_name }}.crt /etc/pki/tls/{{ tls_dir }}/certs/{{ common_name }}.key > /etc/pki/tls/{{ tls_dir }}/certs/{{ common_name }}.pem
+    - require:
+        - module: make_self_signed_certs
+
 master_halite_config:
   file.managed:
     - name: /etc/salt/master.d/halite.conf
@@ -159,8 +165,6 @@ master_halite_config:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
         halite_user: {{ halite_user }}
-    - require:
-        - module: make_self_signed_certs
 
 {{ halite_user }}:
   user.present
@@ -174,21 +178,20 @@ master_api_config:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
 
+/usr/lib/systemd/system/saltapi.service:
+  file.managed:
+    - source: salt://master/saltapi.systemd
+
 master_pip:
   pip.installed:
     - names:
-        - cherrypy
+        - paste
         - halite
         - PyOpenSSL
         - apache-libcloud
+        - salt-api
     - require:
         - pkg: master_deps
-
-master_certs:
-  module.run:
-    - name: tls.create_self_signed_cert
-    - require:
-        - pip: master_pip
 
 cloud_provider_dir:
   file.directory:
@@ -301,6 +304,13 @@ salt-minion:
     - enable: True
     - watch:
         - service: salt-master
+
+saltapi:
+  service.running:
+    - enable: True
+    - require:
+        - file: /usr/lib/systemd/system/saltapi.service
+        - file: master_api_config
 
 salt-minion-key:
   cmd.run:
