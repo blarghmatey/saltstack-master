@@ -178,9 +178,15 @@ master_api_config:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
 
+{% if grains['os'] == 'Ubuntu' %}
+/etc/init/saltapi.conf:
+  file.managed:
+    - source: salt://nginx/files/saltapi.upstart
+{% else %}
 /usr/lib/systemd/system/saltapi.service:
   file.managed:
-    - source: salt://master/saltapi.systemd
+    - source: salt://master/files/saltapi.systemd
+{% endif %}
 
 master_pip:
   pip.installed:
