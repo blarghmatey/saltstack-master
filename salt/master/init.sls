@@ -149,6 +149,7 @@ make_self_signed_certs:
   module.run:
     - name: tls.create_self_signed_cert
     - tls_dir: {{ tls_dir }}
+    - CN: {{ common_name }}
 
 make_halite_pem:
   cmd.run:
@@ -185,6 +186,7 @@ master_pip:
         - halite
         - PyOpenSSL
         - apache-libcloud
+        - tornado
     - require:
         - pkg: master_deps
 
@@ -300,10 +302,12 @@ salt-minion:
     - watch:
         - service: salt-master
 
-saltapi:
+salt-api:
   service.running:
     - enable: True
     - require:
+        - file: master_api_config
+    - watch:
         - file: master_api_config
 
 salt-minion-key:
