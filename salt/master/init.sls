@@ -181,7 +181,7 @@ master_api_config:
 {% if grains['os'] == 'Ubuntu' %}
 /etc/init/saltapi.conf:
   file.managed:
-    - source: salt://nginx/files/saltapi.upstart
+    - source: salt://master/files/saltapi.upstart
     - require_in:
         - service: saltapi
 {% else %}
