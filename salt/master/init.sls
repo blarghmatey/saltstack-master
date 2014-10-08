@@ -152,7 +152,7 @@ make_self_signed_certs:
 
 make_halite_pem:
   cmd.run:
-    - name: cat /etc/pki/tls/{{ tls_dir }}/certs/{{ common_name }}.crt /etc/pki/tls/{{ tls_dir }}/certs/{{ common_name }}.key > /etc/pki/tls/{{ tls_dir }}/certs/{{ common_name }}.pem
+    - name: cat /etc/pki/{{ tls_dir }}/certs/{{ common_name }}.crt /etc/pki/{{ tls_dir }}/certs/{{ common_name }}.key > /etc/pki/{{ tls_dir }}/certs/{{ common_name }}.pem
     - require:
         - module: make_self_signed_certs
 
