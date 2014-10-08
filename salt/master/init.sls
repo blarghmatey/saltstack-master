@@ -178,20 +178,6 @@ master_api_config:
         tls_dir: {{ tls_dir }}
         common_name: {{ common_name }}
 
-{% if grains['os'] == 'Ubuntu' %}
-/etc/init/saltapi.conf:
-  file.managed:
-    - source: salt://master/files/saltapi.upstart
-    - require_in:
-        - service: saltapi
-{% else %}
-/usr/lib/systemd/system/saltapi.service:
-  file.managed:
-    - source: salt://master/files/saltapi.systemd
-    - require_in:
-        - service: saltapi
-{% endif %}
-
 master_pip:
   pip.installed:
     - names:
@@ -199,7 +185,6 @@ master_pip:
         - halite
         - PyOpenSSL
         - apache-libcloud
-        - salt-api
     - require:
         - pkg: master_deps
 
