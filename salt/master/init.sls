@@ -226,6 +226,9 @@ aws_sample_profile:
 {% endif %}
 
 {% if salt['pillar.get']('openstack:enable', False) %}
+python-netaddr:
+  pkg.installed
+
 openstack_base_config:
   file.managed:
     - name: /etc/salt/cloud.providers.d/openstack.conf
