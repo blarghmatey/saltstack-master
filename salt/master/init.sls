@@ -186,7 +186,7 @@ master_pip:
         - halite
         - PyOpenSSL
         - apache-libcloud
-        - tornado
+        - cherrypy==3.2.3
     - require:
         - pkg: master_deps
 
